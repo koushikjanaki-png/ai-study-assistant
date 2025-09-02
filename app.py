@@ -172,11 +172,6 @@ def adaptive_recommend(progress):
 if "progress" not in st.session_state:
     st.session_state.progress = {}
 
-# -------------------------
-# Show subjects & topics
-# -------------------------
-st.subheader("📚 Subjects & Topics")
-st.dataframe(df, use_container_ = true)
 
 # -------------------------
 # Progress Tracking
