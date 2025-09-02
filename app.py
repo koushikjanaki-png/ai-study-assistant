@@ -107,3 +107,48 @@ hours = st.number_input("How many hours did you study today?", min_value=0, max_
 
 if st.button("Save Study Time"):
     st.success(f"Saved: {hours} hours studied today ✅")
+import streamlit as st
+import pandas as pd
+import random
+import os
+
+st.title("📚 AI Study Assistant")
+
+# File to save data
+DATA_FILE = "study_data.csv"
+
+# Load previous data if exists
+if os.path.exists(DATA_FILE):
+    data = pd.read_csv(DATA_FILE)
+else:
+    data = pd.DataFrame(columns=["Day", "Progress", "Hours"])
+
+# --- Recommendations ---
+st.header("📖 Recommendations")
+subjects = ["Math", "Science", "History"]
+if st.button("Get Recommendation"):
+    st.success(f"📌 Study {random.choice(subjects)} today!")
+
+# --- Study Plan ---
+st.header("🗓 Study Plan")
+day = st.selectbox("Choose a day", ["Monday", "Tuesday", "Wednesday"])
+st.write(f"Plan for {day}: Revise notes and practice problems.")
+
+# --- Progress Tracking ---
+st.header("✅ Progress Tracking")
+progress = st.slider("How much have you completed?", 0, 100, 50)
+
+# --- 📊 Study Time Tracker ---
+st.header("📊 Track Study Time")
+hours = st.number_input("How many hours did you study today?", min_value=0, max_value=24, step=1)
+
+if st.button("💾 Save Data"):
+    new_row = {"Day": day, "Progress": progress, "Hours": hours}
+    data = pd.concat([data, pd.DataFrame([new_row])], ignore_index=True)
+    data.to_csv(DATA_FILE, index=False)
+    st.success("✅ Data saved successfully!")
+
+# --- Show History ---
+st.header("📈 Study History")
+if not data.empty:
+    st.dataframe(data)
