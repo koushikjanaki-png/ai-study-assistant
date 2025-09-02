@@ -176,19 +176,7 @@ if "progress" not in st.session_state:
 # Show subjects & topics
 # -------------------------
 st.subheader("📚 Subjects & Topics")
-st.dataframe(df, use_container_width=True)
-
-
-# -------------------------
-# Study Plan
-# -------------------------
-st.subheader("🗓️ Generate Study Plan")
-hours = st.number_input("Hours per day:", min_value=1, max_value=6, value=2, key="plan_hours")
-days = st.number_input("Days left:", min_value=1, max_value=60, value=5, key="plan_days")
-if st.button("Generate Study Plan"):
-    plan = make_study_plan(int(hours), int(days))
-    for d, topics in plan.items():
-        st.write(f"**Day {d}:** {topics}")
+st.dataframe(df, use_container_ = true)
 
 # -------------------------
 # Progress Tracking
