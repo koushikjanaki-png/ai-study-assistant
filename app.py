@@ -178,15 +178,6 @@ if "progress" not in st.session_state:
 st.subheader("📚 Subjects & Topics")
 st.dataframe(df, use_container_width=True)
 
-# -------------------------
-# Recommendations
-# -------------------------
-st.subheader("🎯 Get Topic Recommendations")
-subject_choice = st.selectbox("Choose subject:", ["All"] + sorted(df["subject"].unique().tolist()))
-num = st.slider("How many topics to recommend?", 1, 5, 2, key="rec_num")
-if st.button("Recommend"):
-    recs = recommend_topics(subject_choice, n=num)
-    st.table(recs)
 
 # -------------------------
 # Study Plan
