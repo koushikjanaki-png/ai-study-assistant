@@ -170,25 +170,7 @@ def adaptive_recommend(progress):
 # Session state for progress
 # -------------------------
 if "progress" not in st.session_state:
-    st.session_state.progress = {}
-
-
-# -------------------------
-# Progress Tracking
-# -------------------------
-st.subheader("📌 Mark Your Progress")
-col1, col2 = st.columns(2)
-with col1:
-    topic_pick = st.selectbox("Pick topic:", df["topic"].unique(), key="progress_topic")
-with col2:
-    status = st.selectbox("Set status:", ["weak","ok","good"], key="progress_status")
-if st.button("Save progress"):
-    st.session_state.progress[topic_pick] = status
-    st.success(f"Saved: {topic_pick} = {status}")
-
-if st.button("Show Weak Topics"):
-    st.write(adaptive_recommend(st.session_state.progress))
-    st.write("Current progress:", st.session_state.progress)
+    st.session_state.progress = { }
 
 # -------------------------
 # Study Time Tracker
