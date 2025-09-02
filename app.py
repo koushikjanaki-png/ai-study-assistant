@@ -1,20 +1,24 @@
-# app.py - Study Assistant (Streamlit)
+# app.py - AI Study Assistant (Streamlit)
 import streamlit as st
 import pandas as pd
 import os
 import random
 
+# -------------------------
+# Page config
+# -------------------------
 st.set_page_config(page_title="AI Study Assistant", layout="centered")
 st.title("📘 AI Study Assistant")
-st.write("Simple study planner and recommender. (Works online via Streamlit Cloud)")
+st.write("Simple study planner and recommender. Works online via Streamlit Cloud")
 
 # -------------------------
-# Load subjects.csv if exists, otherwise use default data
+# Load topics / subjects
 # -------------------------
 @st.cache_data
 def load_topics():
     if os.path.exists("subjects.csv"):
         return pd.read_csv("subjects.csv")
+    # default topics
     data = {
         "subject": ["Math","Math","Science","Science","English","English"],
         "topic": ["Algebra","Trigonometry","Physics","Chemistry","Grammar","Essay Writing"],
@@ -38,7 +42,6 @@ def recommend_topics(subject=None, n=3):
 def make_study_plan(hours_per_day, days_left):
     total = days_left * hours_per_day
     pool = df.copy()
-    # allow repeats if total > len(pool)
     sampled = pool.sample(n=total, replace=True).reset_index(drop=True)
     plan = {}
     idx = 0
@@ -58,41 +61,41 @@ if "progress" not in st.session_state:
     st.session_state.progress = {}
 
 # -------------------------
-# UI: show topics
+# Show subjects & topics
 # -------------------------
 st.subheader("📚 Subjects & Topics")
 st.dataframe(df, use_container_width=True)
 
 # -------------------------
-# UI: Recommendation
+# Recommendations
 # -------------------------
 st.subheader("🎯 Get Topic Recommendations")
 subject_choice = st.selectbox("Choose subject:", ["All"] + sorted(df["subject"].unique().tolist()))
-num = st.slider("How many topics to recommend?", 1, 5, 2)
+num = st.slider("How many topics to recommend?", 1, 5, 2, key="rec_num")
 if st.button("Recommend"):
     recs = recommend_topics(subject_choice, n=num)
     st.table(recs)
 
 # -------------------------
-# UI: Study Plan
+# Study Plan
 # -------------------------
 st.subheader("🗓️ Generate Study Plan")
-hours = st.number_input("Hours per day:", min_value=1, max_value=6, value=2)
-days = st.number_input("Days left:", min_value=1, max_value=60, value=5)
+hours = st.number_input("Hours per day:", min_value=1, max_value=6, value=2, key="plan_hours")
+days = st.number_input("Days left:", min_value=1, max_value=60, value=5, key="plan_days")
 if st.button("Generate Study Plan"):
     plan = make_study_plan(int(hours), int(days))
     for d, topics in plan.items():
         st.write(f"**Day {d}:** {topics}")
 
 # -------------------------
-# UI: Mark Progress (Adaptive)
+# Progress Tracking
 # -------------------------
-st.subheader("📌 Mark Your Progress (so AI adapts)")
+st.subheader("📌 Mark Your Progress")
 col1, col2 = st.columns(2)
 with col1:
-    topic_pick = st.selectbox("Pick topic:", df["topic"].unique())
+    topic_pick = st.selectbox("Pick topic:", df["topic"].unique(), key="progress_topic")
 with col2:
-    status = st.selectbox("Set status:", ["weak","ok","good"])
+    status = st.selectbox("Set status:", ["weak","ok","good"], key="progress_status")
 if st.button("Save progress"):
     st.session_state.progress[topic_pick] = status
     st.success(f"Saved: {topic_pick} = {status}")
@@ -100,75 +103,235 @@ if st.button("Save progress"):
 if st.button("Show Weak Topics"):
     st.write(adaptive_recommend(st.session_state.progress))
     st.write("Current progress:", st.session_state.progress)
-  # --- Study Time Tracker ---
-st.header("📊 Track Study Time")
 
-hours = st.number_input("How many hours did you study today?", min_value=0, max_value=24, step=1)
-
+# -------------------------
+# Study Time Tracker
+# -------------------------
+st.subheader("📊 Track Study Time")
+hours_study = st.number_input("Hours studied today:", min_value=0, max_value=24, step=1, key="hours_study")
 if st.button("Save Study Time"):
-    st.success(f"Saved: {hours} hours studied today ✅")
+    st.success(f"Saved: {hours_study} hours studied today ✅")# app.py - AI Study Assistant (Streamlit)
 import streamlit as st
 import pandas as pd
-import random
 import os
+import random
 
-st.title("📚 AI Study Assistant")
+# -------------------------
+# Page config
+# -------------------------
+st.set_page_config(page_title="AI Study Assistant", layout="centered")
+st.title("📘 AI Study Assistant")
+st.write("Simple study planner and recommender. Works online via Streamlit Cloud")
 
-# File to save data
-DATA_FILE = "study_data.csv"
+# -------------------------
+# Load topics / subjects
+# -------------------------
+@st.cache_data
+def load_topics():
+    if os.path.exists("subjects.csv"):
+        return pd.read_csv("subjects.csv")
+    # default topics
+    data = {
+        "subject": ["Math","Math","Science","Science","English","English"],
+        "topic": ["Algebra","Trigonometry","Physics","Chemistry","Grammar","Essay Writing"],
+        "difficulty": ["Medium","Hard","Medium","Easy","Easy","Hard"]
+    }
+    return pd.DataFrame(data)
 
-# Load previous data if exists
-if os.path.exists(DATA_FILE):
-    data = pd.read_csv(DATA_FILE)
-else:
-    data = pd.DataFrame(columns=["Day", "Progress", "Hours"])
+df = load_topics()
 
-# --- Recommendations ---
-st.header("📖 Recommendations")
-subjects = ["Math", "Science", "History"]
-if st.button("Get Recommendation"):
-    st.success(f"📌 Study {random.choice(subjects)} today!")
+# -------------------------
+# Helper functions
+# -------------------------
+def recommend_topics(subject=None, n=3):
+    pool = df.copy()
+    if subject and subject != "All":
+        pool = pool[pool["subject"] == subject]
+    if pool.empty:
+        return pd.DataFrame(columns=df.columns)
+    return pool.sample(n=min(n, len(pool)), replace=False).reset_index(drop=True)
 
-# --- Study Plan ---
-st.header("🗓 Study Plan")
-day = st.selectbox("Choose a day", ["Monday", "Tuesday", "Wednesday"])
-st.write(f"Plan for {day}: Revise notes and practice problems.")
+def make_study_plan(hours_per_day, days_left):
+    total = days_left * hours_per_day
+    pool = df.copy()
+    sampled = pool.sample(n=total, replace=True).reset_index(drop=True)
+    plan = {}
+    idx = 0
+    for day in range(1, days_left+1):
+        plan[day] = sampled.iloc[idx:idx+hours_per_day]["topic"].tolist()
+        idx += hours_per_day
+    return plan
 
-# --- Progress Tracking ---
-st.header("✅ Progress Tracking")
-progress = st.slider("How much have you completed?", 0, 100, 50)
+def adaptive_recommend(progress):
+    weak = [t for t,s in progress.items() if s=="weak"]
+    return weak if weak else ["All topics look good 👍"]
 
-# --- 📊 Study Time Tracker ---
-st.header("📊 Track Study Time")
-hours = st.number_input("How many hours did you study today?", min_value=0, max_value=24, step=1)
+# -------------------------
+# Session state for progress
+# -------------------------
+if "progress" not in st.session_state:
+    st.session_state.progress = {}
 
-if st.button("💾 Save Data"):
-    new_row = {"Day": day, "Progress": progress, "Hours": hours}
-    data = pd.concat([data, pd.DataFrame([new_row])], ignore_index=True)
-    data.to_csv(DATA_FILE, index=False)
-    st.success("✅ Data saved successfully!")
+# -------------------------
+# Show subjects & topics
+# -------------------------
+st.subheader("📚 Subjects & Topics")
+st.dataframe(df, use_container_width=True)
 
-# --- Show History ---
-st.header("📈 Study History")
-if not data.empty:
-    st.dataframe(data)
-# --- Progress Tracking ---
-st.header("✅ Progress Tracking")
-progress = st.slider("How much have you completed? (%)", 0, 100, 50, key="progress")
+# -------------------------
+# Recommendations
+# -------------------------
+st.subheader("🎯 Get Topic Recommendations")
+subject_choice = st.selectbox("Choose subject:", ["All"] + sorted(df["subject"].unique().tolist()))
+num = st.slider("How many topics to recommend?", 1, 5, 2, key="rec_num")
+if st.button("Recommend"):
+    recs = recommend_topics(subject_choice, n=num)
+    st.table(recs)
 
-# --- 📊 Study Time Tracker ---
-st.header("📊 Track Study Time")
-hours = st.number_input("Hours studied today", min_value=0, max_value=24, step=1, key="hours")
-# --- Progress Tracking ---
-st.header("✅ Progress Tracking")
-progress = st.slider("How much have you completed? (%)", 0, 100, 50, key="progress")
+# -------------------------
+# Study Plan
+# -------------------------
+st.subheader("🗓️ Generate Study Plan")
+hours = st.number_input("Hours per day:", min_value=1, max_value=6, value=2, key="plan_hours")
+days = st.number_input("Days left:", min_value=1, max_value=60, value=5, key="plan_days")
+if st.button("Generate Study Plan"):
+    plan = make_study_plan(int(hours), int(days))
+    for d, topics in plan.items():
+        st.write(f"**Day {d}:** {topics}")
 
-# --- 📊 Study Time Tracker ---
-st.header("📊 Track Study Time")
-hours = st.number_input("Hours studied today", min_value=0, max_value=24, step=1, key="hours")# --- Progress Tracking ---
-st.header("✅ Progress Tracking")
-progress = st.slider("How much have you completed? (%)", 0, 100, 50, key="progress")
+# -------------------------
+# Progress Tracking
+# -------------------------
+st.subheader("📌 Mark Your Progress")
+col1, col2 = st.columns(2)
+with col1:
+    topic_pick = st.selectbox("Pick topic:", df["topic"].unique(), key="progress_topic")
+with col2:
+    status = st.selectbox("Set status:", ["weak","ok","good"], key="progress_status")
+if st.button("Save progress"):
+    st.session_state.progress[topic_pick] = status
+    st.success(f"Saved: {topic_pick} = {status}")
 
-# --- 📊 Study Time Tracker ---
-st.header("📊 Track Study Time")
-hours = st.number_input("Hours studied today", min_value=0, max_value=24, step=1, key="hours")
+if st.button("Show Weak Topics"):
+    st.write(adaptive_recommend(st.session_state.progress))
+    st.write("Current progress:", st.session_state.progress)
+
+# -------------------------
+# Study Time Tracker
+# -------------------------
+st.subheader("📊 Track Study Time")
+hours_study = st.number_input("Hours studied today:", min_value=0, max_value=24, step=1, key="hours_study")
+if st.button("Save Study Time"):
+    st.success(f"Saved: {hours_study} hours studied today ✅")# app.py - AI Study Assistant (Streamlit)
+import streamlit as st
+import pandas as pd
+import os
+import random
+
+# -------------------------
+# Page config
+# -------------------------
+st.set_page_config(page_title="AI Study Assistant", layout="centered")
+st.title("📘 AI Study Assistant")
+st.write("Simple study planner and recommender. Works online via Streamlit Cloud")
+
+# -------------------------
+# Load topics / subjects
+# -------------------------
+@st.cache_data
+def load_topics():
+    if os.path.exists("subjects.csv"):
+        return pd.read_csv("subjects.csv")
+    # default topics
+    data = {
+        "subject": ["Math","Math","Science","Science","English","English"],
+        "topic": ["Algebra","Trigonometry","Physics","Chemistry","Grammar","Essay Writing"],
+        "difficulty": ["Medium","Hard","Medium","Easy","Easy","Hard"]
+    }
+    return pd.DataFrame(data)
+
+df = load_topics()
+
+# -------------------------
+# Helper functions
+# -------------------------
+def recommend_topics(subject=None, n=3):
+    pool = df.copy()
+    if subject and subject != "All":
+        pool = pool[pool["subject"] == subject]
+    if pool.empty:
+        return pd.DataFrame(columns=df.columns)
+    return pool.sample(n=min(n, len(pool)), replace=False).reset_index(drop=True)
+
+def make_study_plan(hours_per_day, days_left):
+    total = days_left * hours_per_day
+    pool = df.copy()
+    sampled = pool.sample(n=total, replace=True).reset_index(drop=True)
+    plan = {}
+    idx = 0
+    for day in range(1, days_left+1):
+        plan[day] = sampled.iloc[idx:idx+hours_per_day]["topic"].tolist()
+        idx += hours_per_day
+    return plan
+
+def adaptive_recommend(progress):
+    weak = [t for t,s in progress.items() if s=="weak"]
+    return weak if weak else ["All topics look good 👍"]
+
+# -------------------------
+# Session state for progress
+# -------------------------
+if "progress" not in st.session_state:
+    st.session_state.progress = {}
+
+# -------------------------
+# Show subjects & topics
+# -------------------------
+st.subheader("📚 Subjects & Topics")
+st.dataframe(df, use_container_width=True)
+
+# -------------------------
+# Recommendations
+# -------------------------
+st.subheader("🎯 Get Topic Recommendations")
+subject_choice = st.selectbox("Choose subject:", ["All"] + sorted(df["subject"].unique().tolist()))
+num = st.slider("How many topics to recommend?", 1, 5, 2, key="rec_num")
+if st.button("Recommend"):
+    recs = recommend_topics(subject_choice, n=num)
+    st.table(recs)
+
+# -------------------------
+# Study Plan
+# -------------------------
+st.subheader("🗓️ Generate Study Plan")
+hours = st.number_input("Hours per day:", min_value=1, max_value=6, value=2, key="plan_hours")
+days = st.number_input("Days left:", min_value=1, max_value=60, value=5, key="plan_days")
+if st.button("Generate Study Plan"):
+    plan = make_study_plan(int(hours), int(days))
+    for d, topics in plan.items():
+        st.write(f"**Day {d}:** {topics}")
+
+# -------------------------
+# Progress Tracking
+# -------------------------
+st.subheader("📌 Mark Your Progress")
+col1, col2 = st.columns(2)
+with col1:
+    topic_pick = st.selectbox("Pick topic:", df["topic"].unique(), key="progress_topic")
+with col2:
+    status = st.selectbox("Set status:", ["weak","ok","good"], key="progress_status")
+if st.button("Save progress"):
+    st.session_state.progress[topic_pick] = status
+    st.success(f"Saved: {topic_pick} = {status}")
+
+if st.button("Show Weak Topics"):
+    st.write(adaptive_recommend(st.session_state.progress))
+    st.write("Current progress:", st.session_state.progress)
+
+# -------------------------
+# Study Time Tracker
+# -------------------------
+st.subheader("📊 Track Study Time")
+hours_study = st.number_input("Hours studied today:", min_value=0, max_value=24, step=1, key="hours_study")
+if st.button("Save Study Time"):
+    st.success(f"Saved: {hours_study} hours studied today ✅")
