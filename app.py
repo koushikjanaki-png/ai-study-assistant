@@ -116,12 +116,6 @@ import pandas as pd
 import os
 import random
 
-# -------------------------
-# Page config
-# -------------------------
-st.set_page_config(page_title="AI Study Assistant", layout="centered")
-st.title("📘 AI Study Assistant")
-st.write("Simple study planner and recommender. Works online via Streamlit Cloud")
 
 # -------------------------
 # Load topics / subjects
