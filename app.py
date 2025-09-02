@@ -100,4 +100,10 @@ if st.button("Save progress"):
 if st.button("Show Weak Topics"):
     st.write(adaptive_recommend(st.session_state.progress))
     st.write("Current progress:", st.session_state.progress)
-  
+  # --- Study Time Tracker ---
+st.header("📊 Track Study Time")
+
+hours = st.number_input("How many hours did you study today?", min_value=0, max_value=24, step=1)
+
+if st.button("Save Study Time"):
+    st.success(f"Saved: {hours} hours studied today ✅")
