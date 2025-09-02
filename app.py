@@ -152,3 +152,10 @@ if st.button("💾 Save Data"):
 st.header("📈 Study History")
 if not data.empty:
     st.dataframe(data)
+# --- Progress Tracking ---
+st.header("✅ Progress Tracking")
+progress = st.slider("How much have you completed? (%)", 0, 100, 50, key="progress")
+
+# --- 📊 Study Time Tracker ---
+st.header("📊 Track Study Time")
+hours = st.number_input("Hours studied today", min_value=0, max_value=24, step=1, key="hours")
