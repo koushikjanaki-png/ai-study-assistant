@@ -172,13 +172,7 @@ def adaptive_recommend(progress):
 if "progress" not in st.session_state:
     st.session_state.progress = { }
 
-# -------------------------
-# Study Time Tracker
-# -------------------------
-st.subheader("📊 Track Study Time")
-hours_study = st.number_input("Hours studied today:", min_value=0, max_value=24, step=1, key="hours_study")
-if st.button("Save Study Time"):
-    st.success(f"Saved: {hours_study} hours studied today ✅")
+
 
 
 
