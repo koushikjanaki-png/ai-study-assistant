@@ -159,7 +159,7 @@ def make_study_plan(hours_per_day, days_left):
 
 def adaptive_recommend(progress):
     weak = [t for t,s in progress.items() if s=="weak"]
-    return weak if weak else ["All topics look good 
+    return weak if weak else ["All topics look good\nKeep studying!"]
 
 
 
