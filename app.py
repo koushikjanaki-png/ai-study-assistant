@@ -165,7 +165,34 @@ def adaptive_recommend(progress):
 # -------------------------
 if "progress" not in st.session_state:
     st.session_state.progress = { }
+# -------------------------
+# Chat AI with bubbles
+# -------------------------
+st.subheader("💬 Chat with AI")
 
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# User input
+user_input = st.text_input("Ask me anything about your studies:", key="chat_input")
+
+if user_input:
+    # Simple AI response (replace later with GPT API if needed)
+    response = f"Review regularly, take breaks, and stay consistent! 👍"
+    
+    # Save to session history
+    st.session_state.messages.append({"user": user_input, "ai": response})
+
+# Display chat history with colored bubbles
+for chat in st.session_state.messages:
+    st.markdown(
+        (f"<div style='background-color:#DCF8C6; padding:8px; border-radius:8px; width:70%; margin-bottom:5px;'>**You:** {chat['user']}</div>",
+        unsafe_allow_html=True)
+    
+    st.markdown
+        (f"<div style='background-color:#EAEAEA; padding:8px; border-radius:8px; width:70%; margin-bottom:10px;'>**AI:** {chat['ai']}</div>",
+        unsafe_allow_html=True)    
 
 
 
