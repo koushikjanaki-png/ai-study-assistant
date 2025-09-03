@@ -20,8 +20,8 @@ def load_topics():
         return pd.read_csv("subjects.csv")
     # default topics
     data = {
-        "subject": ["Math","Math","Science","Science","English","English"],
-        "topic": ["Algebra","Trigonometry","Physics","Chemistry","Grammar","Essay Writing"],
+        "subject": ["Math","Math","Math"],
+        "topic": ["Rational numder","Linear equation","Quardrilaterals"],
         "difficulty": ["Medium","Hard","Medium","Easy","Easy","Hard"]
     }
     return pd.DataFrame(data)
