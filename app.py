@@ -160,24 +160,9 @@ def make_study_plan(hours_per_day, days_left):
 def adaptive_recommend(progress):
     weak = [t for t,s in progress.items() if s=="weak"]
     return weak if weak else ["All topics look good\nKeep studying!"]
-import os
 import openai
-
-openai.api_key = os.environ["OPENAI_API_KEY"]
-response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": "Hello"}]
-)
-
-print(response['choices'][0]['message']['content'])
-
 import streamlit as st
 
-user_input = st.text_input("You: ")
-if user_input:
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": user_input}]
-    )
-    st.write("Bot:", response['choices'][0]['message']['content'])
+# Access the key under [general] section
+openai.api_key = st.secrets["general"]["OPENAI_API_KEY"]
 
