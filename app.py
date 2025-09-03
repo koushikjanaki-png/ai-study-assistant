@@ -166,7 +166,10 @@ def adaptive_recommend(progress):
 # -------------------------
 if "progress" not in st.session_state:
     st.session_state.progress = {}   
+import openai
+import streamlit as st
 
+openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 
 
